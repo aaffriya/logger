@@ -35,7 +35,7 @@ func (h *prettyHandler) Json(r slog.Record) error {
 	logLineByte := []byte(logLine)
 
 	if len(logData) > 0 {
-		logLineByte = append(logLineByte, []byte(Gray+"Data:"+Reset+NewLine)...)
+		logLineByte = append(logLineByte, []byte(NewLine+Gray+"Data:"+Reset+NewLine)...)
 		jsonBytes, _ := json.MarshalIndent(logData, "", "  ")
 
 		coloredJSON := applyJSONSyntaxHighlighting(string(jsonBytes))

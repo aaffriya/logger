@@ -45,9 +45,11 @@ func (h *fileHandler) Handle(r slog.Record) error {
 	}
 	
 	jsonBytes = append(jsonBytes, '\n')
-
+	
+	// 🔐 Synchronize writes
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	
 	_, err = h.writer.Write(jsonBytes)
 	
 	return err

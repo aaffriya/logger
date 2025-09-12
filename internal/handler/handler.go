@@ -188,12 +188,3 @@ func (h *Handler) clone() *Handler {
 		isFile:  h.isFile,
 	}
 }
-
-func (h *Handler) Close() error {
-	if h.isFile {
-		if file, ok := h.writer.(*os.File); ok {
-			return file.Close()
-		}
-	}
-	return nil
-}
