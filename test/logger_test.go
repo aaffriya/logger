@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"os"
 	"strings"
 	"testing"
 
-	"github.com/aaffriya/logger"
 	"github.com/aaffriya/logger/config"
 	customhandler "github.com/aaffriya/logger/internal/handler"
 	ctxmeta "github.com/aaffriya/logger/pkg/context"
@@ -72,7 +72,9 @@ func TestSetupFileLogger(t *testing.T) {
 		},
 	}
 
-	logger.SetupFileLogger(loggerConfig, nil, tmpFile)
+	handler := customhandler.NewHandler(loggerConfig, nil, tmpFile)
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 	
 	// Test logging
 	slog.Info("Test file message", "test_key", "test_value")
@@ -212,5 +214,48 @@ func TestStackTraceEnabled(t *testing.T) {
 	output := buf.String()
 	if !strings.Contains(output, "Stack Trace:") {
 		t.Errorf("Expected output to contain stack trace, got: %s", output)
+	}
+}
+
+func TestErrorObjectInJson(t *testing.T) {
+	jsonObj := map[string]any{
+		"msg": "An error occurred",
+		"error": errors.New("sample error"),
+	}
+	
+	var buf bytes.Buffer
+	loggerConfig := &config.LoggerConfig{
+		DefaultFields: config.DefaultFieldInfo{
+			Version: "v1.0.0",
+			Service: "TestService",
+		},
+		Stack: config.StackConfig{
+			Enabled: false,
+		},
+		Pretty: config.PrettyConfig{
+			IncludeTimestamp: true,
+			IsJsonOutput:     true,
+		},
+	}
+
+	handler := customhandler.NewHandler(loggerConfig, nil, &buf)
+	logger := slog.New(handler)
+	
+	logger.Info("Logging error object", "data", jsonObj)
+	
+	output := buf.String()
+	
+	// The output should be in hybrid format: formatted line + JSON data section
+	if !strings.Contains(output, "Logging error object") {
+		t.Errorf("Expected output to contain log message, got: %s", output)
+	}
+	if !strings.Contains(output, "Data:") {
+		t.Errorf("Expected output to contain 'Data:' section, got: %s", output)
+	}
+	if !strings.Contains(output, "sample error") {
+		t.Errorf("Expected output to contain 'sample error', got: %s", output)
+	}
+	if !strings.Contains(output, "An error occurred") {
+		t.Errorf("Expected output to contain 'An error occurred', got: %s", output)
 	}
 }

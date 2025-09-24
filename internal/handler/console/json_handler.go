@@ -23,7 +23,7 @@ func (h *prettyHandler) Json(r slog.Record) error {
 				trace = traceVal
 			}
 		default:
-			logData[a.Key] = a.Value.Any()
+			logData[a.Key] = h.convertValueForJSON(a.Value.Any())
 		}
 		return true
 	})
@@ -46,4 +46,30 @@ func (h *prettyHandler) Json(r slog.Record) error {
 
 	_, err := h.writer.Write(logLineByte)
 	return err
+}
+
+// convertValueForJSON recursively converts values to be JSON-serializable
+func (h *prettyHandler) convertValueForJSON(value any) any {
+	switch v := value.(type) {
+	case error:
+		// Convert error to string
+		return v.Error()
+	case map[string]any:
+		// Recursively convert map values
+		result := make(map[string]any)
+		for k, val := range v {
+			result[k] = h.convertValueForJSON(val)
+		}
+		return result
+	case []any:
+		// Recursively convert slice values
+		result := make([]any, len(v))
+		for i, val := range v {
+			result[i] = h.convertValueForJSON(val)
+		}
+		return result
+	default:
+		// Return value as-is for other types
+		return value
+	}
 }
