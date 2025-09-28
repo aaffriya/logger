@@ -32,6 +32,21 @@ func NewHandler(config *config.LoggerConfig, opts *slog.HandlerOptions, w io.Wri
 		opts = &slog.HandlerOptions{}
 	}
 
+	var logLevel slog.Level
+	switch config.Level {
+	case "debug":
+		logLevel = slog.LevelDebug
+	case "info":
+		logLevel = slog.LevelInfo
+	case "warn":
+		logLevel = slog.LevelWarn
+	case "error":
+		logLevel = slog.LevelError
+	default:
+		logLevel = slog.LevelInfo
+	}
+	opts.Level = &logLevel
+
 	// Determine if this is a file writer by checking if it's an *os.File
 	isFile := false
 	if f, ok := w.(*os.File); ok {

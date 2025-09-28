@@ -2,6 +2,7 @@ package config
 
 type LoggerConfig struct {
 	Stack         StackConfig      `yaml:"stack"             json:"stack"`
+	Level         string           `yaml:"level"             json:"level"` // debug, info, warn, error
 	DefaultFields DefaultFieldInfo `yaml:"default_fields"    json:"default_fields"`
 	Pretty        PrettyConfig     `yaml:"pretty"           json:"pretty"`
 }
