@@ -1,15 +1,15 @@
 package ctxmeta
 
 import (
-	"maps"
 	"context"
 	"log/slog"
-
+	"maps"
 )
 
 type ctxKey string
 
 const contextCarrierKey ctxKey = "ctxmeta-values"
+const contextDataCarrierKey ctxKey = "ctxmeta-data-values"
 
 // Set a single key-value pair (returns new context)
 func Set(ctx context.Context, key string, value string) context.Context {
@@ -66,6 +66,36 @@ func GetAll(ctx context.Context) map[string]string {
 // Helper: copyMap ensures we don't mutate shared maps
 func copyMap(original map[string]string) map[string]string {
 	newMap := make(map[string]string, len(original))
+	maps.Copy(newMap, original)
+	return newMap
+}
+
+// SetData stores a key-value pair where value can be any type (returns new context)
+func SetData(ctx context.Context, key string, value any) context.Context {
+	carrier := copyDataMap(GetAllData(ctx))
+	carrier[key] = value
+	return context.WithValue(ctx, contextDataCarrierKey, carrier)
+}
+
+// GetData returns a value of any type
+func GetData(ctx context.Context, key string) (any, bool) {
+	carrier := GetAllData(ctx)
+	val, ok := carrier[key]
+	return val, ok
+}
+
+// GetAllData returns all stored key-value pairs with any type values
+func GetAllData(ctx context.Context) map[string]any {
+	val := ctx.Value(contextDataCarrierKey)
+	if carrier, ok := val.(map[string]any); ok {
+		return carrier
+	}
+	return make(map[string]any)
+}
+
+// Helper: copyDataMap ensures we don't mutate shared maps
+func copyDataMap(original map[string]any) map[string]any {
+	newMap := make(map[string]any, len(original))
 	maps.Copy(newMap, original)
 	return newMap
 }
