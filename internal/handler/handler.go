@@ -2,15 +2,16 @@ package handler
 
 import (
 	"context"
+	"io"
+	"log/slog"
+	"os"
+	"strings"
+
 	"github.com/aaffriya/logger/config"
 	consolehandler "github.com/aaffriya/logger/internal/handler/console"
 	filehandler "github.com/aaffriya/logger/internal/handler/file"
 	"github.com/aaffriya/logger/internal/utils"
 	ctxmeta "github.com/aaffriya/logger/pkg/context"
-	"io"
-	"log/slog"
-	"os"
-	"strings"
 )
 
 type LogHandler interface {
@@ -106,6 +107,12 @@ func (h *Handler) prepareLogAttrs(ctx context.Context, level slog.Level, recordA
 		contextData := ctxmeta.FromContext(ctx)
 		if contextData.TraceID != "" {
 			attrs = append(attrs, slog.String("trace_id", contextData.TraceID))
+		}
+		if contextData.SpanID != "" {
+			attrs = append(attrs, slog.String("span_id", contextData.SpanID))
+		}
+		if contextData.TraceFlags != "" {
+			attrs = append(attrs, slog.String("trace_flags", contextData.TraceFlags))
 		}
 		if contextData.UserID != "" {
 			attrs = append(attrs, slog.String("user_id", contextData.UserID))

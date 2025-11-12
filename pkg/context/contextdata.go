@@ -6,6 +6,8 @@ import (
 
 const (
 	TraceIDKey     = "trace_id"
+	SpanIDKey      = "span_id"
+	TraceFlagsKey  = "trace_flags"
 	UserIDKey      = "user_id"
 	ActionKey      = "action"
 	SessionIDKey   = "session_id"
@@ -15,6 +17,8 @@ const (
 
 type ContextData struct {
 	TraceID     string
+	SpanID      string
+	TraceFlags  string
 	UserID      string
 	SessionID   string
 	Action      string
@@ -29,10 +33,16 @@ func FromContext(ctx context.Context) ContextData {
 	}
 
 	data := ContextData{}
-	allData := GetPair(ctx, TraceIDKey, UserIDKey, SessionIDKey, ActionKey, TokenKey)
+	allData := GetPair(ctx, TraceIDKey, SpanIDKey, TraceFlagsKey, UserIDKey, SessionIDKey, ActionKey, TokenKey)
 
 	if traceID, ok := allData[TraceIDKey]; ok {
 		data.TraceID = traceID
+	}
+	if spanID, ok := allData[SpanIDKey]; ok {
+		data.SpanID = spanID
+	}
+	if traceFlags, ok := allData[TraceFlagsKey]; ok {
+		data.TraceFlags = traceFlags
 	}
 	if userID, ok := allData[UserIDKey]; ok {
 		data.UserID = userID
@@ -57,9 +67,43 @@ func FromContext(ctx context.Context) ContextData {
 	return data
 }
 
-// WithTraceID sets trace_id in ctxmeta context store
-func WithTraceID(ctx context.Context, traceID string) context.Context {
-	return SetPair(ctx, TraceIDKey, traceID)
+// WithTraceID sets trace context in ctxmeta context store
+// Accepts either a full W3C traceparent format (00-traceID-spanID-flags) or just a traceID
+// If traceparent format is provided, it will parse and store traceID, spanID, and traceFlags separately
+func WithTraceID(ctx context.Context, value string) context.Context {
+	// Try to parse as traceparent; if successful, store components, else store as simple trace ID
+	if tc, err := ParseTraceparent(value); err == nil {
+		return SetPair(ctx, TraceIDKey, tc.TraceID, SpanIDKey, tc.ParentID, TraceFlagsKey, tc.TraceFlags)
+	}
+	return SetPair(ctx, TraceIDKey, value)
+}
+
+// WithSpanID sets span_id in ctxmeta context store
+func WithSpanID(ctx context.Context, spanID string) context.Context {
+	return SetPair(ctx, SpanIDKey, spanID)
+}
+
+// WithTraceFlags sets trace_flags in ctxmeta context store
+func WithTraceFlags(ctx context.Context, traceFlags string) context.Context {
+	return SetPair(ctx, TraceFlagsKey, traceFlags)
+}
+
+// GetTraceID retrieves trace_id from ctxmeta context store
+func GetTraceID(ctx context.Context) string {
+	traceID, _ := Get(ctx, TraceIDKey)
+	return traceID
+}
+
+// GetSpanID retrieves span_id from ctxmeta context store
+func GetSpanID(ctx context.Context) string {
+	spanID, _ := Get(ctx, SpanIDKey)
+	return spanID
+}
+
+// GetTraceFlags retrieves trace_flags from ctxmeta context store
+func GetTraceFlags(ctx context.Context) string {
+	traceFlags, _ := Get(ctx, TraceFlagsKey)
+	return traceFlags
 }
 
 // WithUserID sets user_id in ctxmeta context store

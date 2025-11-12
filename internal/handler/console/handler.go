@@ -2,10 +2,11 @@ package console
 
 import (
 	"fmt"
-	"github.com/aaffriya/logger/config"
 	"io"
 	"log/slog"
 	"strings"
+
+	"github.com/aaffriya/logger/config"
 )
 
 type PrettyHandler interface {

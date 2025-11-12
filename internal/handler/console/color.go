@@ -27,36 +27,36 @@ const (
 )
 
 var LevelColor = map[int]string{
-	-4: Cyan,    // DEBUG
-	0:  Green,   // INFO
-	4:  Yellow,  // WARN
-	8:  Red,     // ERROR
+	-4: Cyan,   // DEBUG
+	0:  Green,  // INFO
+	4:  Yellow, // WARN
+	8:  Red,    // ERROR
 }
 
 // Field-specific color mapping based on data type and context
 var FieldColors = map[string]string{
-	"trace_id":     Cyan + Bold,
-	"user_id":      Blue + Bold,
-	"action":       Magenta + Bold,
-	"service":      Green + Italic,
-	"version":      Gray + Italic,
-	"error":        Red + Bold,
-	"database":     Blue,
-	"timeout":      Yellow,
-	"retry_count":  Yellow,
-	"ip_address":   Cyan,
-	"user_agent":   Gray,
-	"email":        Blue,
-	"status":       Green,
-	"method":       Magenta,
-	"url":          UnderlineColor + Blue,
-	"duration":     Yellow,
-	"memory":       Cyan,
-	"cpu":          Green,
-	"disk":         Yellow,
+	"trace_id":    Cyan + Bold,
+	"span_id":     Cyan + Bold,
+	"trace_flags": Cyan + Bold,
+	"user_id":     Blue + Bold,
+	"action":      Magenta + Bold,
+	"service":     Green + Italic,
+	"version":     Gray + Italic,
+	"error":       Red + Bold,
+	"database":    Blue,
+	"timeout":     Yellow,
+	"retry_count": Yellow,
+	"ip_address":  Cyan,
+	"user_agent":  Gray,
+	"email":       Blue,
+	"status":      Green,
+	"method":      Magenta,
+	"url":         UnderlineColor + Blue,
+	"duration":    Yellow,
+	"memory":      Cyan,
+	"cpu":         Green,
+	"disk":        Yellow,
 }
-
-
 
 // Value-based color logic
 func getValueColor(key string, value any) string {

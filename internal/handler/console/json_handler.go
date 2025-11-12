@@ -13,7 +13,7 @@ func (h *prettyHandler) Json(r slog.Record) error {
 
 	r.Attrs(func(a slog.Attr) bool {
 		if a.Key == "service" || a.Key == "version" ||
-			a.Key == "trace_id" || a.Key == "user_id" || a.Key == "action" {
+			a.Key == "trace_id" || a.Key == "span_id" || a.Key == "trace_flags" || a.Key == "user_id" || a.Key == "action" {
 			return true
 		}
 
